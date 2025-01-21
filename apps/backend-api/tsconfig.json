@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "strict": true,
+    "types": [
+      "bun-types"
+    ],
+    "lib": ["ES2022"],
+    "target": "ES2022",
+
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
+
+    // Bundler mode
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationDir": "./types",
+    "outDir": "./dist",
+    
+
+    // Best practices
+
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Some stricter flags
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noPropertyAccessFromIndexSignature": true
+  }
+}

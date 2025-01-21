@@ -1,1 +1,1 @@
-# mental-health
+THis project all code for mysoulwise app, frontend and backend

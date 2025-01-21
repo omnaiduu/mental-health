@@ -1,0 +1,26 @@
+{
+  "name": "@backend-api/om",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "types": "tsc --declaration --emitDeclarationOnly --declarationDir types"
+  },
+  "types": "./types/src/hc.d.ts",
+  "dependencies": {
+    "@hono/zod-validator": "^0.4.2",
+    "@lexical/headless": "^0.23.1",
+    "backend": "workspace:*",
+    "email-template": "workspace:*",
+    "hono": "^4.6.14",
+    "lexical": "^0.23.1",
+    "resend": "^4.0.1",
+    "zod": "^3.24.1"
+  },
+  "exports": {
+    ".": "./src/hc.ts",
+    "./ws/types": "./src/wsTypes.ts",
+    "./tools": "./src/tools.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
