@@ -18,6 +18,8 @@ export const clientAction = async ({ request }: Route.ClientActionArgs) => {
     throw new Error("Invalid action");
   }
   const otp = formdata.get("otp")?.toString();
+  console.log(import.meta.env.VITE_BACKEND);
+  console.log(import.meta.env.VITE_WS);
 
   const client = hcWithType(import.meta.env.VITE_BACKEND, {
     init: {
@@ -77,16 +79,15 @@ function LoginForm() {
     error: "",
   };
 
-  
   const f = useSecureFetcher<typeof clientAction>();
-  
+
   const isSub = f.state === "submitting";
-  
+
   if (f.data) {
     //@ts-ignore
     authStatus = f.data;
   }
-  
+
   const isEmailSubmitted = authStatus.otpRequested;
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();

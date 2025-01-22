@@ -6,7 +6,7 @@ export declare const chat: import("hono/hono-base").HonoBase<{
         $post: {
             input: {
                 json: {
-                    action: "get" | "next" | "prev";
+                    action: "get" | "prev" | "next";
                     id?: number | undefined;
                 };
             };
@@ -18,16 +18,30 @@ export declare const chat: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "next" | "prev";
+                    action: "get" | "prev" | "next";
+                    id?: number | undefined;
+                };
+            };
+            output: {
+                chats: never[];
+                firstItemFromData: number;
+                lastItemFromData: number;
+            };
+            outputFormat: "json";
+            status: import("hono/utils/http-status").ContentfulStatusCode;
+        } | {
+            input: {
+                json: {
+                    action: "get" | "prev" | "next";
                     id?: number | undefined;
                 };
             };
             output: {
                 chats: {
-                    userID: number;
                     title: string | null;
                     time: number;
                     chatID: number;
+                    userID: number;
                 }[];
                 firstItemFromData: number;
                 lastItemFromData: number;
@@ -41,23 +55,14 @@ export declare const chat: import("hono/hono-base").HonoBase<{
         $post: {
             input: {
                 json: {
-                    action: "delete" | "create";
-                    content?: string | undefined;
+                    action: "create" | "delete" | "remember";
+                    noteID?: number | undefined;
                     chatID?: number | undefined;
-                };
-            };
-            output: {
-                redirect: boolean;
-                location: string;
-            };
-            outputFormat: "json";
-            status: import("hono/utils/http-status").StatusCode;
-        } | {
-            input: {
-                json: {
-                    action: "delete" | "create";
-                    content?: string | undefined;
-                    chatID?: number | undefined;
+                    messages?: {
+                        content: string;
+                        role: "user" | "assistant";
+                    }[] | undefined;
+                    contentToRemember?: string | undefined;
                 };
             };
             output: {
@@ -68,9 +73,33 @@ export declare const chat: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "delete" | "create";
-                    content?: string | undefined;
+                    action: "create" | "delete" | "remember";
+                    noteID?: number | undefined;
                     chatID?: number | undefined;
+                    messages?: {
+                        content: string;
+                        role: "user" | "assistant";
+                    }[] | undefined;
+                    contentToRemember?: string | undefined;
+                };
+            };
+            output: {
+                redirect: boolean;
+                location: string;
+            };
+            outputFormat: "json";
+            status: import("hono/utils/http-status").ContentfulStatusCode;
+        } | {
+            input: {
+                json: {
+                    action: "create" | "delete" | "remember";
+                    noteID?: number | undefined;
+                    chatID?: number | undefined;
+                    messages?: {
+                        content: string;
+                        role: "user" | "assistant";
+                    }[] | undefined;
+                    contentToRemember?: string | undefined;
                 };
             };
             output: {
@@ -130,6 +159,9 @@ export declare const chat: import("hono/hono-base").HonoBase<{
                             transfer: {};
                             transferToFixedLength: {};
                         } | {
+                            type: "Buffer";
+                            data: number[];
+                        } | {
                             [x: number]: number;
                             readonly BYTES_PER_ELEMENT: number;
                             readonly buffer: {
@@ -175,9 +207,6 @@ export declare const chat: import("hono/hono-base").HonoBase<{
                             findLastIndex: {};
                             toSorted: {};
                             with: {};
-                        } | {
-                            type: "Buffer";
-                            data: number[];
                         };
                         mimeType?: string | undefined;
                         experimental_providerMetadata?: {
@@ -197,6 +226,9 @@ export declare const chat: import("hono/hono-base").HonoBase<{
                             transfer: {};
                             transferToFixedLength: {};
                         } | {
+                            type: "Buffer";
+                            data: number[];
+                        } | {
                             [x: number]: number;
                             readonly BYTES_PER_ELEMENT: number;
                             readonly buffer: {
@@ -242,9 +274,6 @@ export declare const chat: import("hono/hono-base").HonoBase<{
                             findLastIndex: {};
                             toSorted: {};
                             with: {};
-                        } | {
-                            type: "Buffer";
-                            data: number[];
                         };
                         mimeType: string;
                         experimental_providerMetadata?: {
@@ -314,6 +343,18 @@ export declare const chat: import("hono/hono-base").HonoBase<{
                 })[];
                 redirect: boolean;
                 error: null;
+            };
+            outputFormat: "json";
+            status: 200;
+        };
+    };
+} & {
+    "/home": {
+        $get: {
+            input: {};
+            output: {
+                role: "assistant";
+                content: string;
             };
             outputFormat: "json";
             status: 200;

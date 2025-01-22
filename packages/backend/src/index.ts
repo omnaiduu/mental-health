@@ -69,7 +69,7 @@ type ScheduledTask = {
 
 declare module "bun" {
   interface Env {
-    DB_PATH: string;
-    VITE_BACKEND: string;
-  }
+			DB_PATH: string;
+			COOKIE: string;
+		}
 }

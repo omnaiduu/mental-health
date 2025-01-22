@@ -2,7 +2,7 @@
   "name": "My Soul Wise",
   "short_name": "SoulWise",
   "description": "A simple Progressive Web App for Soul Wise",
-  "start_url": "/",
+  "start_url": "/app",
   "display": "standalone",
   "id": "com.my-soul-wise",
   "background_color": "#f8f9fa",

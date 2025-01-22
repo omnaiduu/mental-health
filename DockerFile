@@ -1,0 +1,30 @@
+FROM oven/bun:latest
+
+WORKDIR /app
+WORKDIR /app/db
+WORKDIR /app
+
+# Copy root monorepo config
+COPY package.json bun.lockb ./
+
+# Copy packages
+COPY ./packages ./packages
+
+# Copy backend API
+COPY ./apps/backend-api ./apps/backend-api
+
+# Copy frontend code into backend API folder
+COPY ./apps/frontend/build ./apps/backend-api/build
+
+
+RUN bun install
+
+WORKDIR /app/packages/backend
+RUN bun mig
+
+WORKDIR /app/apps/backend-api
+
+EXPOSE 3001
+
+CMD ["bun", "run", "start"]
+

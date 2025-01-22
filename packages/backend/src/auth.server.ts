@@ -34,7 +34,7 @@ export const { getSession, commitSession, destroySession } =
                 sameSite: "lax",
 secrets: ["omtech23"],
                 secure: true,
-                domain: `.${Bun.env["VITE_BACKEND"]}`
+                domain: `.${Bun.env["COOKIE"]}`
             },
         }
     );

@@ -47,7 +47,7 @@ export declare const note: import("hono/hono-base").HonoBase<{
         $post: {
             input: {
                 json: {
-                    action: "get" | "next" | "prev";
+                    action: "get" | "prev" | "next";
                     id?: number | undefined;
                 };
             };
@@ -59,18 +59,33 @@ export declare const note: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "next" | "prev";
+                    action: "get" | "prev" | "next";
+                    id?: number | undefined;
+                };
+            };
+            output: {
+                action: "get";
+                notes: never[];
+                firstItemFromData: number;
+                lastItemFromData: number;
+            };
+            outputFormat: "json";
+            status: import("hono/utils/http-status").ContentfulStatusCode;
+        } | {
+            input: {
+                json: {
+                    action: "get" | "prev" | "next";
                     id?: number | undefined;
                 };
             };
             output: {
                 action: "get";
                 notes: {
-                    userID: number | null;
-                    noteID: number;
                     title: string | null;
-                    content: never;
                     time: number;
+                    content: never;
+                    noteID: number;
+                    userID: number | null;
                 }[];
                 firstItemFromData: number;
                 lastItemFromData: number;
@@ -80,18 +95,33 @@ export declare const note: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "next" | "prev";
+                    action: "get" | "prev" | "next";
+                    id?: number | undefined;
+                };
+            };
+            output: {
+                action: "next";
+                notes: never[];
+                firstItemFromData: number;
+                lastItemFromData: number;
+            };
+            outputFormat: "json";
+            status: import("hono/utils/http-status").ContentfulStatusCode;
+        } | {
+            input: {
+                json: {
+                    action: "get" | "prev" | "next";
                     id?: number | undefined;
                 };
             };
             output: {
                 action: "next";
                 notes: {
-                    userID: number | null;
-                    noteID: number;
                     title: string | null;
-                    content: never;
                     time: number;
+                    content: never;
+                    noteID: number;
+                    userID: number | null;
                 }[];
                 firstItemFromData: number;
                 lastItemFromData: number;
@@ -101,18 +131,33 @@ export declare const note: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "next" | "prev";
+                    action: "get" | "prev" | "next";
+                    id?: number | undefined;
+                };
+            };
+            output: {
+                action: "prev";
+                notes: never[];
+                firstItemFromData: number;
+                lastItemFromData: number;
+            };
+            outputFormat: "json";
+            status: import("hono/utils/http-status").ContentfulStatusCode;
+        } | {
+            input: {
+                json: {
+                    action: "get" | "prev" | "next";
                     id?: number | undefined;
                 };
             };
             output: {
                 action: "prev";
                 notes: {
-                    userID: number | null;
-                    noteID: number;
                     title: string | null;
-                    content: never;
                     time: number;
+                    content: never;
+                    noteID: number;
+                    userID: number | null;
                 }[];
                 firstItemFromData: number;
                 lastItemFromData: number;
@@ -134,15 +179,15 @@ export declare const note: import("hono/hono-base").HonoBase<{
             };
             output: {
                 data: {
-                    userID: number | null;
-                    noteID: number;
                     title: string | null;
-                    content: never;
                     time: number;
+                    content: never;
+                    noteID: number;
+                    userID: number | null;
                 }[];
             };
             outputFormat: "json";
-            status: import("hono/utils/http-status").StatusCode;
+            status: import("hono/utils/http-status").ContentfulStatusCode;
         } | {
             input: {
                 json: {
@@ -160,3 +205,4 @@ export declare const note: import("hono/hono-base").HonoBase<{
         };
     };
 }, "/">;
+export declare function saveNote(content: string, noteID: number, userID: number, title?: string): Promise<void>;
