@@ -11,3 +11,6 @@ THis project all code for mysoulwise app, frontend and backend
   -e COOKIE="omnaidu.codes" \
   -e AI_TOKEN="AIzaSyCJ7pi_ORD8n_l6uMEy8fcCctD4byNG_7M" \
   mentalhealth````
+
+  docker tag mentalhealth:latest registry.digitalocean.com/freelance/mentalhealth:latest
+@cloudcreatr ➜ ~ $ docker push registry.digitalocean.com/freelance/mentalhealth:latest
