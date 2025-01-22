@@ -55,13 +55,13 @@ export declare const chat: import("hono/hono-base").HonoBase<{
         $post: {
             input: {
                 json: {
-                    action: "create" | "delete" | "remember";
-                    noteID?: number | undefined;
-                    chatID?: number | undefined;
+                    action: "create" | "remember" | "delete";
                     messages?: {
                         content: string;
                         role: "user" | "assistant";
                     }[] | undefined;
+                    noteID?: number | undefined;
+                    chatID?: number | undefined;
                     contentToRemember?: string | undefined;
                 };
             };
@@ -73,13 +73,13 @@ export declare const chat: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "create" | "delete" | "remember";
-                    noteID?: number | undefined;
-                    chatID?: number | undefined;
+                    action: "create" | "remember" | "delete";
                     messages?: {
                         content: string;
                         role: "user" | "assistant";
                     }[] | undefined;
+                    noteID?: number | undefined;
+                    chatID?: number | undefined;
                     contentToRemember?: string | undefined;
                 };
             };
@@ -92,13 +92,13 @@ export declare const chat: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "create" | "delete" | "remember";
-                    noteID?: number | undefined;
-                    chatID?: number | undefined;
+                    action: "create" | "remember" | "delete";
                     messages?: {
                         content: string;
                         role: "user" | "assistant";
                     }[] | undefined;
+                    noteID?: number | undefined;
+                    chatID?: number | undefined;
                     contentToRemember?: string | undefined;
                 };
             };

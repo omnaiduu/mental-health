@@ -12,7 +12,8 @@
 		"./db": "./src/db.ts",
 		"./schema": "./src/schema.ts",
 		"./auth": "./src/auth.server.ts",
-		"./ai": "./src/ai.ts"
+		"./ai": "./src/ai.ts",
+		"./migrate": "./src/migrate.ts"
 	},
 	"peerDependencies": {
 		"typescript": "^5.0.0"

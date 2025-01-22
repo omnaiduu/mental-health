@@ -1,30 +1,53 @@
+# Stage 1: Frontend Build
+FROM oven/bun:latest AS frontend-build
+
+WORKDIR /mental-health
+
+# Copy all packages and apps
+COPY ./packages ./packages
+COPY ./apps ./apps
+
+# Copy root monorepo config
+COPY package.json bun.lock ./
+
+# Navigate to frontend directory
+WORKDIR /mental-health/apps/frontend
+
+# Install and build frontend
+RUN bun install
+RUN bun run build
+
+# Stage 2: Backend Setup
 FROM oven/bun:latest
 
 WORKDIR /app
-WORKDIR /app/db
-WORKDIR /app
 
 # Copy root monorepo config
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
 
-# Copy packages
+# Copy all packages
 COPY ./packages ./packages
+COPY ./apps ./apps
 
-# Copy backend API
-COPY ./apps/backend-api ./apps/backend-api
-
-# Copy frontend code into backend API folder
-COPY ./apps/frontend/build ./apps/backend-api/build
+# Copy root monorepo config
+COPY package.json bun.lock ./
 
 
+
+# Copy built frontend from frontend-build stage
+COPY --from=frontend-build /mental-health/apps/frontend/build ./apps/backend-api/build
+
+# Copy migrations
+COPY ./packages/backend/migrations ./apps/backend-api/migrations
+
+# Install backend dependencies
+WORKDIR /app/apps/backend-api
 RUN bun install
 
-WORKDIR /app/packages/backend
-RUN bun mig
 
-WORKDIR /app/apps/backend-api
 
-EXPOSE 3001
-
+# Command to start the application
 CMD ["bun", "run", "start"]
+
+
 

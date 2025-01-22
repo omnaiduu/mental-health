@@ -11,44 +11,50 @@ import { note } from "./notes";
 import { createBunWebSocket } from "hono/bun";
 import type { ServerWebSocket } from "bun";
 import {
-	createGoogleGenerativeAI,
-	streamText,
-	type CoreAssistantMessage,
-	type CoreUserMessage,
-	type MessagesStored,
+  createGoogleGenerativeAI,
+  streamText,
+  type CoreAssistantMessage,
+  type CoreUserMessage,
+  type MessagesStored,
 } from "backend/ai";
 import { and, db, eq } from "backend/db";
 import { chats, chatsNotes, userChats } from "backend/schema";
 import { chat } from "./chat";
 import type {
-	SendMessage,
-	WebsocketError,
-	GeneratingStatus,
-	textStream,
-	StartTextStream,
-	WsMsg,
+  SendMessage,
+  WebsocketError,
+  GeneratingStatus,
+  textStream,
+  StartTextStream,
+  WsMsg,
 } from "./wsTypes";
 import { tools } from "./tools";
 
 import { getSystemPrompt } from "./getSystemPromt";
-import { frontend } from "frontend"
+import { frontend } from "frontend";
+import { migrateProductionDB } from "backend/migrate";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
+if (import.meta.env.NODE_ENV === "production") {
+  console.log("Running miagration");
+  migrateProductionDB();
+}
+
 declare module "bun" {
-	interface Env {
-		FRONTEND: string;
-		DB_PATH: string;
-		RESEND: string;
-		AI_TOKEN: string;
-		VITE_BACKEND: string;
-		VITE_WS: string;
-		COOKIE: string;
-	}
+  interface Env {
+    FRONTEND: string;
+    DB_PATH: string;
+    RESEND: string;
+    AI_TOKEN: string;
+    VITE_BACKEND: string;
+    VITE_WS: string;
+    COOKIE: string;
+  }
 }
 
 export type Variables = {
-	userID: number;
+  userID: number;
 };
 
 const app = new Hono<{
@@ -409,22 +415,20 @@ const app = new Hono<{
     return c.json({
       message: "Test",
     });
-  })
-  .use("*", (c, next) => {
-    const mode = import.meta.env.NODE_ENV;
-    if (mode === "development") {
-      next();
-    }
-    return frontend(c, next);
   });
-	
+
+app.use("*", (c, next) => {
+  const mode = import.meta.env.NODE_ENV;
+  if (mode === "development") {
+    next();
+  }
+  return frontend(c, next);
+});
 
 export type AppRoute = typeof app;
 
-console.log("ENV", import.meta.env.NODE_ENV);
-
 export default {
-	port: 3001,
-	fetch: app.fetch,
-	websocket,
+  port: 3001,
+  fetch: app.fetch,
+  websocket,
 } as Serve;

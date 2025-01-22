@@ -8,13 +8,10 @@
 	"types": "./types/src/hc.d.ts",
 	"dependencies": {
 		"@hono/zod-validator": "^0.4.2",
-		"@lexical/headless": "^0.23.1",
 		"backend": "workspace:*",
 		"email-template": "workspace:*",
-		"hono": "^4.6.14",
-
-		"lexical": "^0.23.1",
 		"frontend": "workspace:*",
+		"hono": "^4.6.14",
 		"resend": "^4.0.1",
 		"zod": "^3.24.1"
 	},

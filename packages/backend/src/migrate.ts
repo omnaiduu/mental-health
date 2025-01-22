@@ -5,4 +5,7 @@ import { Database } from "bun:sqlite";
 
 const sqlite = new Database(Bun.env.DB_PATH);
 const db = drizzle(sqlite);
- migrate(db, { migrationsFolder: "./migrations" });
+migrate(db, { migrationsFolder: "./migrations" });
+
+export const migrateProductionDB = () =>
+	migrate(db, { migrationsFolder: "./migrations" });
