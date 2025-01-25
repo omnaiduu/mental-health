@@ -1,53 +1,46 @@
+# Global build arguments
+ARG VITE_BACKEND=http://localhost:3001
+ARG VITE_WS=ws://localhost:3001
+
 # Stage 1: Frontend Build
 FROM oven/bun:latest AS frontend-build
+
+# Redeclare build args in this stage
+ARG VITE_BACKEND
+ARG VITE_WS
+
+# Set environment variables
+ENV VITE_BACKEND=${VITE_BACKEND}
+ENV VITE_WS=${VITE_WS}
 
 WORKDIR /mental-health
 
 # Copy all packages and apps
 COPY ./packages ./packages
 COPY ./apps ./apps
-
-# Copy root monorepo config
 COPY package.json bun.lock ./
 
-# Navigate to frontend directory
 WORKDIR /mental-health/apps/frontend
-
-# Install and build frontend
+RUN rm -rf .env.production
 RUN bun install
 RUN bun run build
 
 # Stage 2: Backend Setup
 FROM oven/bun:latest
 
+# Redeclare args if needed in backend
+ARG VITE_BACKEND
+ARG VITE_WS
+
 WORKDIR /app
-
-# Copy root monorepo config
 COPY package.json bun.lock ./
-
-# Copy all packages
 COPY ./packages ./packages
 COPY ./apps ./apps
-
-# Copy root monorepo config
-COPY package.json bun.lock ./
-
-
-
-# Copy built frontend from frontend-build stage
 COPY --from=frontend-build /mental-health/apps/frontend/build ./apps/backend-api/build
-
-# Copy migrations
+COPY --from=frontend-build /mental-health/apps/frontend/build ./apps/frontend/build
 COPY ./packages/backend/migrations ./apps/backend-api/migrations
 
-# Install backend dependencies
 WORKDIR /app/apps/backend-api
 RUN bun install
 
-
-
-# Command to start the application
 CMD ["bun", "run", "start"]
-
-
-

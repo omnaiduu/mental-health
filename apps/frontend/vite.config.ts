@@ -7,9 +7,9 @@ import autoprefixer from "autoprefixer";
 
 
 export default defineConfig(({ isSsrBuild }) => ({
-	
+	envDir: ".",
+	envPrefix: "VITE_",
 	build: {
-		
 		rollupOptions: isSsrBuild
 			? {
 					input: "./server/app.ts",
