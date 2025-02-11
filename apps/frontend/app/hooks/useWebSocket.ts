@@ -1,3 +1,4 @@
+import type { receiveMessage } from "@backend-api/om/ws/types";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 interface WebSocketHookOptions {
@@ -10,7 +11,7 @@ interface WebSocketHookResult {
 	isConnecting: boolean;
 	error: string | null;
 	connect: () => void;
-	sendMessage: (message: string) => void;
+	sendMessage: (message: receiveMessage) => void;
 }
 
 export function useWebSocket({
@@ -42,13 +43,17 @@ export function useWebSocket({
 		};
 
 		socket.onerror = () => {
-			setError("Oops, you've been disconnected, but your conversation can be re-established");
+			setError(
+				"Oops, you've been disconnected, but your conversation can be re-established",
+			);
 			setIsDisconnected(true);
 			setIsConnecting(false);
 		};
 
 		socket.onclose = (event) => {
-			setError(event.reason || "The connection was lost, but we can reconnect.");
+			setError(
+				event.reason || "The connection was lost, but we can reconnect.",
+			);
 			setIsDisconnected(true);
 			setIsConnecting(false);
 		};
@@ -56,9 +61,9 @@ export function useWebSocket({
 		socketRef.current = socket;
 	}, [url, onMessage]);
 
-	const sendMessage = useCallback((message: string) => {
+	const sendMessage = useCallback((message: receiveMessage) => {
 		if (socketRef.current?.readyState === WebSocket.OPEN) {
-			socketRef.current.send(message);
+			socketRef.current.send(JSON.stringify(message));
 		} else {
 			console.error("WebSocket is not connected");
 		}

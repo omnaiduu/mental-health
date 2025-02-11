@@ -18,8 +18,7 @@ export const clientAction = async ({ request }: Route.ClientActionArgs) => {
     throw new Error("Invalid action");
   }
   const otp = formdata.get("otp")?.toString();
-  console.log(import.meta.env.VITE_BACKEND);
-  console.log(import.meta.env.VITE_WS);
+  
 
   const client = hcWithType(import.meta.env.VITE_BACKEND, {
     init: {

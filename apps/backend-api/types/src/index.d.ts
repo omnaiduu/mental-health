@@ -15,14 +15,14 @@ export type Variables = {
 };
 declare const app: import("hono/hono-base").HonoBase<{
     Variables: Variables;
-}, ((({
+}, (({
     "/api/*": {};
 } & {
     "/auth": {
         $post: {
             input: {
                 json: {
-                    action: "request" | "verify" | "logout";
+                    action: "request" | "logout" | "verify";
                     email?: string | undefined;
                     otp?: string | undefined;
                 };
@@ -35,7 +35,7 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "request" | "verify" | "logout";
+                    action: "request" | "logout" | "verify";
                     email?: string | undefined;
                     otp?: string | undefined;
                 };
@@ -48,7 +48,7 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "request" | "verify" | "logout";
+                    action: "request" | "logout" | "verify";
                     email?: string | undefined;
                     otp?: string | undefined;
                 };
@@ -124,7 +124,7 @@ declare const app: import("hono/hono-base").HonoBase<{
         $post: {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
@@ -136,7 +136,7 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
@@ -151,18 +151,18 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
             output: {
                 action: "get";
                 notes: {
+                    userID: number | null;
                     title: string | null;
                     time: number;
-                    content: never;
                     noteID: number;
-                    userID: number | null;
+                    content: never;
                 }[];
                 firstItemFromData: number;
                 lastItemFromData: number;
@@ -172,7 +172,7 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
@@ -187,18 +187,18 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
             output: {
                 action: "next";
                 notes: {
+                    userID: number | null;
                     title: string | null;
                     time: number;
-                    content: never;
                     noteID: number;
-                    userID: number | null;
+                    content: never;
                 }[];
                 firstItemFromData: number;
                 lastItemFromData: number;
@@ -208,7 +208,7 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
@@ -223,18 +223,18 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
             output: {
                 action: "prev";
                 notes: {
+                    userID: number | null;
                     title: string | null;
                     time: number;
-                    content: never;
                     noteID: number;
-                    userID: number | null;
+                    content: never;
                 }[];
                 firstItemFromData: number;
                 lastItemFromData: number;
@@ -248,19 +248,19 @@ declare const app: import("hono/hono-base").HonoBase<{
         $post: {
             input: {
                 json: {
-                    action: "get" | "save";
                     noteID: number;
+                    action: "get" | "save";
                     title?: string | undefined;
                     content?: string | undefined;
                 };
             };
             output: {
                 data: {
+                    userID: number | null;
                     title: string | null;
                     time: number;
-                    content: never;
                     noteID: number;
-                    userID: number | null;
+                    content: never;
                 }[];
             };
             outputFormat: "json";
@@ -268,8 +268,8 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "save";
                     noteID: number;
+                    action: "get" | "save";
                     title?: string | undefined;
                     content?: string | undefined;
                 };
@@ -286,7 +286,7 @@ declare const app: import("hono/hono-base").HonoBase<{
         $post: {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
@@ -298,7 +298,7 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
@@ -312,16 +312,16 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "get" | "prev" | "next";
+                    action: "get" | "next" | "prev";
                     id?: number | undefined;
                 };
             };
             output: {
                 chats: {
+                    userID: number;
+                    chatID: number;
                     title: string | null;
                     time: number;
-                    chatID: number;
-                    userID: number;
                 }[];
                 firstItemFromData: number;
                 lastItemFromData: number;
@@ -335,13 +335,13 @@ declare const app: import("hono/hono-base").HonoBase<{
         $post: {
             input: {
                 json: {
-                    action: "create" | "remember" | "delete";
+                    action: "delete" | "create" | "remember";
+                    chatID?: number | undefined;
+                    noteID?: number | undefined;
                     messages?: {
                         content: string;
                         role: "user" | "assistant";
                     }[] | undefined;
-                    noteID?: number | undefined;
-                    chatID?: number | undefined;
                     contentToRemember?: string | undefined;
                 };
             };
@@ -353,13 +353,13 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "create" | "remember" | "delete";
+                    action: "delete" | "create" | "remember";
+                    chatID?: number | undefined;
+                    noteID?: number | undefined;
                     messages?: {
                         content: string;
                         role: "user" | "assistant";
                     }[] | undefined;
-                    noteID?: number | undefined;
-                    chatID?: number | undefined;
                     contentToRemember?: string | undefined;
                 };
             };
@@ -372,13 +372,13 @@ declare const app: import("hono/hono-base").HonoBase<{
         } | {
             input: {
                 json: {
-                    action: "create" | "remember" | "delete";
+                    action: "delete" | "create" | "remember";
+                    chatID?: number | undefined;
+                    noteID?: number | undefined;
                     messages?: {
                         content: string;
                         role: "user" | "assistant";
                     }[] | undefined;
-                    noteID?: number | undefined;
-                    chatID?: number | undefined;
                     contentToRemember?: string | undefined;
                 };
             };
@@ -439,9 +439,6 @@ declare const app: import("hono/hono-base").HonoBase<{
                             transfer: {};
                             transferToFixedLength: {};
                         } | {
-                            type: "Buffer";
-                            data: number[];
-                        } | {
                             [x: number]: number;
                             readonly BYTES_PER_ELEMENT: number;
                             readonly buffer: {
@@ -487,6 +484,9 @@ declare const app: import("hono/hono-base").HonoBase<{
                             findLastIndex: {};
                             toSorted: {};
                             with: {};
+                        } | {
+                            type: "Buffer";
+                            data: number[];
                         };
                         mimeType?: string | undefined;
                         experimental_providerMetadata?: {
@@ -506,9 +506,6 @@ declare const app: import("hono/hono-base").HonoBase<{
                             transfer: {};
                             transferToFixedLength: {};
                         } | {
-                            type: "Buffer";
-                            data: number[];
-                        } | {
                             [x: number]: number;
                             readonly BYTES_PER_ELEMENT: number;
                             readonly buffer: {
@@ -554,6 +551,9 @@ declare const app: import("hono/hono-base").HonoBase<{
                             findLastIndex: {};
                             toSorted: {};
                             with: {};
+                        } | {
+                            type: "Buffer";
+                            data: number[];
                         };
                         mimeType: string;
                         experimental_providerMetadata?: {
@@ -640,7 +640,49 @@ declare const app: import("hono/hono-base").HonoBase<{
             status: 200;
         };
     };
-}, "/api/chat">) & {
+}, "/api/chat"> | import("hono/types").MergeSchemaPath<{
+    "/": {
+        $post: {
+            input: {};
+            output: {
+                error: string;
+            };
+            outputFormat: "json";
+            status: 400;
+        } | {
+            input: {};
+            output: {
+                message: string;
+                filename: string;
+                originalName: string;
+                size: number;
+                type: string;
+            };
+            outputFormat: "json";
+            status: import("hono/utils/http-status").ContentfulStatusCode;
+        } | {
+            input: {};
+            output: {
+                error: string;
+            };
+            outputFormat: "json";
+            status: 500;
+        };
+    };
+} & {
+    "/:id": {
+        $get: {
+            input: {
+                param: {
+                    id: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: import("hono/utils/http-status").StatusCode;
+        };
+    };
+}, "/api/upload">) & {
     "/api/chat/ws/:chatID": {
         $get: {
             input: {
@@ -660,17 +702,6 @@ declare const app: import("hono/hono-base").HonoBase<{
             output: {};
             outputFormat: "ws";
             status: import("hono/utils/http-status").StatusCode;
-        };
-    };
-}) & {
-    test: {
-        $get: {
-            input: {};
-            output: {
-                message: string;
-            };
-            outputFormat: "json";
-            status: import("hono/utils/http-status").ContentfulStatusCode;
         };
     };
 }, "/">;

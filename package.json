@@ -1,27 +1,23 @@
 {
   "name": "soulwise",
-  "private": true,
-  "scripts": {
-    "build": "turbo build",
-    "tunnel": "sudo service cloudflared start",
-    "dev": "turbo dev",
-  
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
-  },
   "devDependencies": {
     "prettier": "^3.4.2",
-    "turbo": "^2.3.3",
+    "turbo": "^2.4.0",
     "typescript": "^5.7.3"
   },
   "engines": {
     "node": ">=18"
   },
   "packageManager": "bun@1.1.30",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "tunnel": "sudo service cloudflared start",
+    "dev": "turbo dev",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "dependencies": {
-    "wrangler": "^3.103.2"
-  }
+  ]
 }

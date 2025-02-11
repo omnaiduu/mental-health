@@ -1,8 +1,10 @@
 import { memo } from "react";
 import { motion } from "motion/react";
 import type { MessagesStored } from "backend/ai";
+
 import { TextTypingLoadingIndicator } from "./input";
 import Markdown from "react-markdown";
+import { Microphone } from "~/Icons";
 // Animation constants
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -12,8 +14,6 @@ const containerVariants = {
     transition: { duration: 0.5, ease: "easeOut" },
   },
 };
-
-
 
 // Message Header Component
 const MessageHeader = ({ role }: { role: string }) => (
@@ -28,15 +28,7 @@ const MessageHeader = ({ role }: { role: string }) => (
 );
 
 // Message Content Component
-const MessageContent = ({
-  content,
-  isLatest,
-  role,
-}: {
-  content: string;
-  isLatest: boolean;
-  role: string;
-}) => {
+const MessageContent = ({ content }: { content: string }) => {
   return (
     <>
       {content === "" ? (
@@ -82,8 +74,7 @@ const MessageContent = ({
                 className="border-l-4 border-gray-300 pl-4 italic mb-4"
                 {...props}
               />
-            )
-          
+            ),
           }}
         >
           {content}
@@ -96,12 +87,15 @@ const MessageContent = ({
 // Main Message Component
 interface MessageProps {
   message: MessagesStored;
-  isLatest: boolean;
 }
 
-function MessageComponent({ message, isLatest }: MessageProps) {
+function MessageComponent({ message }: MessageProps) {
   const content =
     typeof message.content === "string" ? message.content : "NOT STRING";
+  const isText = typeof message.content === "string";
+  const isAudio =
+    Array.isArray(message.content) && message.content[0].type === "file";
+  
 
   return (
     <motion.div
@@ -112,24 +106,26 @@ function MessageComponent({ message, isLatest }: MessageProps) {
         "flex" + (message.role === "user" ? " justify-end" : " justify-start")
       }
     >
-      <motion.div
-        layout
-        className={`p-4 rounded-lg shadow-md shadow-gray-300/50 ${
+      <div
+        className={`p-6 rounded-lg pb-2  space-y-2 shadow-md shadow-gray-300/50 ${
           message.role === "user"
             ? "bg-primary text-white"
             : "bg-secondary text-text-base"
         }`}
-        transition={{ duration: 0.3, type: "spring", stiffness: 100 }}
       >
         <MessageHeader role={message.role} />
-        <div className="text-wrap break-all">
-          <MessageContent
-            content={content}
-            isLatest={isLatest}
-            role={message.role}
-          />
-        </div>
-      </motion.div>
+        {isText && (
+          <div className="text-wrap ">
+            <MessageContent content={content} />
+          </div>
+        )}
+        {isAudio && (
+          <div className="text-white pb-6 gap-2 font-medium italic flex">
+            <Microphone />
+            <p>Audio message</p>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }

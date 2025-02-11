@@ -34,6 +34,7 @@ export const { getSession, commitSession, destroySession } =
                 sameSite: "lax",
 secrets: ["omtech23"],
                 secure: true,
+              maxAge: 30 * 24 * 60 * 60,
                 domain: `.${Bun.env["COOKIE"]}`
             },
         }

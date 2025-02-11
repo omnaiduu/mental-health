@@ -8,6 +8,7 @@ import { chats, chatsNotes, userChats } from "backend/schema";
 import { type Variables } from ".";
 import {
 	createGoogleGenerativeAI,
+	generateObject,
 	generateText,
 	type CoreAssistantMessage,
 	type MessagesStored,
@@ -86,8 +87,8 @@ export const chat = new Hono<{ Variables: Variables }>()
 				return c.json(
 					{
 						chats: chatResult.value,
-						firstItemFromData: firstItemFromData.value[0].chatID ,
-						lastItemFromData: lastItemFromData.value[0].chatID ,
+						firstItemFromData: firstItemFromData.value[0].chatID,
+						lastItemFromData: lastItemFromData.value[0].chatID,
 					},
 					200,
 				);
@@ -148,7 +149,6 @@ export const chat = new Hono<{ Variables: Variables }>()
 					});
 				}
 
-
 				return c.json(
 					{
 						chats: chatResult.value,
@@ -196,7 +196,6 @@ export const chat = new Hono<{ Variables: Variables }>()
 						401,
 					);
 				}
-
 
 				if (chatResult.value.length === 0) {
 					return c.json({
@@ -411,26 +410,34 @@ export const chat = new Hono<{ Variables: Variables }>()
 		);
 	})
 	.get("/home", async (c) => {
-		const Messages: MessagesStored[] = [
-			{
-				role: "system",
-				content: getSystemPrompt(),
-			},
-			{
-				role: "user",
-				content: "Hello",
-			},
-		];
 		const google = createGoogleGenerativeAI({
 			apiKey: Bun.env.AI_TOKEN,
 		});
-		const { text } = await generateText({
-			model: google("gemini-1.5-flash-latest"),
-			messages: Messages,
+		const { object } = await generateObject({
+			model: google("gemini-2.0-flash-exp"),
+			schema: z.object({
+				affimation: z.string().describe("your affimation"),
+				createChat: z.string().describe("button text for create chat"),
+				createJournal: z
+					.string()
+					.describe("button text for create journal entry"),
+			}),
+			temperature: 1,
+			messages: [
+				{
+					role: "system",
+					content: `
+				Your supportive friend and you have to give affifmtion or funny affirmastion. use emoji when if you can
+				 also genrate conservation type of text for button to chat with you, and also for a buttton to createa journal entry.
+
+				 use emoji for button text if possible
+				`,
+				},{
+					role: "user",
+					content: "Generate me affimation, button text. use the instruction above",
+				}
+			],
 		});
-		const assistantMessage: { role: "assistant"; content: string } = {
-			role: "assistant",
-			content: text,
-		};
-		return c.json(assistantMessage, 200);
+
+		return c.json(object, 200);
 	});

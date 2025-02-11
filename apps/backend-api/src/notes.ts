@@ -170,7 +170,7 @@ export const note = new Hono<{ Variables: Variables }>()
 				);
 			}
 			if (action === "next") {
-				console.log("next");
+				
 				const [notesResult, firstItemFromData, lastItemFromData] =
 					await Promise.allSettled([
 						db
@@ -228,7 +228,7 @@ export const note = new Hono<{ Variables: Variables }>()
 				);
 			}
 			if (action === "prev") {
-				console.log("prev");
+			
 				const Subquery = db
 					.select()
 					.from(userNotes)

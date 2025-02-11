@@ -7,6 +7,7 @@
 	},
 	"types": "./types/src/hc.d.ts",
 	"dependencies": {
+		"@google/generative-ai": "^0.21.0",
 		"@hono/zod-validator": "^0.4.2",
 		"backend": "workspace:*",
 		"email-template": "workspace:*",

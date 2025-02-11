@@ -1,6 +1,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarProvider,
@@ -14,11 +15,11 @@ import {
   Link,
   Outlet,
   useLocation,
+  useNavigation,
   useRouteError,
-  
 } from "react-router";
 import type { Route } from "../app/+types/route";
-import { ChatIcon, Note, Notes, Out, Plus, Settings } from "./Icons";
+import { ChatIcon, Note, Notes, Out, Plus } from "./Icons";
 import { useEffect, useRef } from "react";
 import { Redirect, useSecureFetcher } from "~/hooks/redirect";
 import { hcWithType } from "@backend-api/om";
@@ -162,7 +163,9 @@ export function ErrorBoundary() {
 
 function SidebarComp() {
   const f = useSecureFetcher<typeof clientAction>();
-
+  const navigation = useNavigation();
+  const loading = navigation.state === "loading";
+ 
   return (
     <Sidebar>
       <SidebarContent className="bg-background p-4 space-y-2">
@@ -222,11 +225,20 @@ function SidebarComp() {
           <MenuItem to="/app/notes" name="Notes">
             <Notes />
           </MenuItem>
-          <MenuItem to="/app/settings" name="Settings">
+          {/* <MenuItem to="/app/settings" name="Settings">
             <Settings />
-          </MenuItem>
+          </MenuItem> */}
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="p-8">
+        {loading && (
+          <>
+            <p className="text-text-base animate-pulse font-semibold">
+              Almost ready for you to start chatting...
+            </p>
+          </>
+        )}
+      </SidebarFooter>
     </Sidebar>
   );
 }

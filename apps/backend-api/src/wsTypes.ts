@@ -1,8 +1,25 @@
-import type { MessagesStored } from "backend/ai";
+import type { FilePart, MessagesStored } from "backend/ai";
 
 export interface SendMessage {
+	type: "message";
 	message: string;
 }
+
+export interface SendAudio {
+	type: "audio";
+	audio: {
+		id: string;
+		mimeType: string;
+		fileName: string;
+	};
+}
+
+export interface RedirectData {
+	redirect?: boolean;
+	location?: string;
+}
+
+export type receiveMessage = SendAudio | SendMessage;
 
 export interface WebsocketError {
 	error: string;

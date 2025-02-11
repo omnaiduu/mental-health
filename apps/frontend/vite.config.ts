@@ -1,10 +1,7 @@
 import { defineConfig } from "vite";
 import { reactRouter } from "@react-router/dev/vite";
-import path from "path"
+import path from "path";
 import tsconfigPaths from "vite-tsconfig-paths";
-import tailwindcss from "tailwindcss";
-import autoprefixer from "autoprefixer";
-
 
 export default defineConfig(({ isSsrBuild }) => ({
 	envDir: ".",
@@ -16,10 +13,8 @@ export default defineConfig(({ isSsrBuild }) => ({
 				}
 			: undefined,
 	},
-	css: {
-		postcss: {
-			plugins: [tailwindcss, autoprefixer],
-		},
+	server: {
+		allowedHosts: [`app.omnaidu.codes`],
 	},
 	plugins: [reactRouter(), tsconfigPaths()],
 	resolve: {
@@ -28,4 +23,3 @@ export default defineConfig(({ isSsrBuild }) => ({
 		},
 	},
 }));
-

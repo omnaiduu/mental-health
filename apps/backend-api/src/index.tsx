@@ -15,30 +15,36 @@ import {
   streamText,
   type CoreAssistantMessage,
   type CoreUserMessage,
+  type FilePart,
   type MessagesStored,
 } from "backend/ai";
 import { and, db, eq } from "backend/db";
 import { chats, chatsNotes, userChats } from "backend/schema";
 import { chat } from "./chat";
 import type {
-  SendMessage,
   WebsocketError,
   GeneratingStatus,
   textStream,
   StartTextStream,
   WsMsg,
+  receiveMessage,
+  RedirectData,
 } from "./wsTypes";
 import { tools } from "./tools";
 
 import { getSystemPrompt } from "./getSystemPromt";
+//@ts-ignore
 import { frontend } from "frontend";
 import { migrateProductionDB } from "backend/migrate";
+import { upload } from "./upload";
+import { FileState, GoogleAIFileManager } from "@google/generative-ai/server";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
+// todo should only run in production
 if (import.meta.env.NODE_ENV === "production") {
   console.log("Running miagration");
-  migrateProductionDB();
+  // migrateProductionDB();
 }
 
 declare module "bun" {
@@ -134,8 +140,8 @@ const app = new Hono<{
         return c.json({
           error: "User is already logged in",
           redirect: true,
-          loacton: "/",
-        });
+          location: "/app",
+        } as RedirectData);
       }
       if (data.action === "request") {
         try {
@@ -264,8 +270,10 @@ const app = new Hono<{
 
     return c.json({ userID }, 200);
   })
+  .post("")
   .route("/api/note", note)
   .route("/api/chat", chat)
+  .route("/api/upload", upload)
   .get(
     "/api/chat/ws/:chatID",
     upgradeWebSocket((c) => {
@@ -299,18 +307,14 @@ const app = new Hono<{
           };
           ws.send(JSON.stringify(GeneratingStatus));
 
-          const recivedData = JSON.parse(event.data.toString()) as SendMessage;
-          ws.raw?.publishText(roomName, recivedData.message);
+          const recivedData = JSON.parse(
+            event.data.toString()
+          ) as receiveMessage;
 
           const StoredChat = await db
             .select()
             .from(chats)
             .where(eq(chats.chatID, chatID));
-
-          const userMessage: CoreUserMessage = {
-            role: "user",
-            content: recivedData.message,
-          };
 
           const noteText = await db
             .select({
@@ -329,7 +333,70 @@ const app = new Hono<{
             content: systemPrompt,
           };
           const onlyMessages = StoredChat.map((m) => m.message);
-          const Messages = [SystemMessage, ...onlyMessages, userMessage];
+          const Messages = [SystemMessage, ...onlyMessages];
+          const name: string[] = [];
+          if (recivedData.type === "audio") {
+            const fileManager = new GoogleAIFileManager(Bun.env.AI_TOKEN);
+            const file = recivedData.audio;
+
+            const filePart2: FilePart[] = [];
+            const originalExt = file.fileName.split(".").pop() || "";
+            const path = `uploads/${file.id}.${originalExt}`;
+            const uploaded = await fileManager.uploadFile(path, {
+              mimeType: file.mimeType,
+              displayName: file.id,
+            });
+
+            name.push(uploaded.file.name);
+
+            filePart2.push({
+              type: "file",
+              mimeType: uploaded.file.mimeType,
+              data: uploaded.file.uri,
+            });
+
+            for (let i = 0; i < name.length; i++) {
+              const fileName = name[i];
+              // const originalExt = file.fileName.split(".").pop() || "";
+              // const path = `uploads/${file.id}.${originalExt}`;
+              let fileG = await fileManager.getFile(fileName);
+              while (fileG.state === FileState.PROCESSING) {
+                console.log(`File ${fileG.displayName} is still processing...`);
+                // Sleep for 10 seconds
+                await new Promise((resolve) => setTimeout(resolve, 10_000));
+                // Fetch the file from the API again
+                fileG = await fileManager.getFile(fileName);
+              }
+              if (fileG.state === FileState.FAILED) {
+                console.error(`File ${fileG.displayName} failed to process`);
+                return c.json(
+                  {
+                    error: `File ${fileG.displayName} failed to process`,
+                  },
+                  401
+                );
+              }
+              console.log(`File ${fileG.displayName} is ready for analysis`);
+
+              const userMessage: CoreUserMessage = {
+                role: "user",
+                content: filePart2,
+              };
+              Messages.push(userMessage);
+            }
+          } else if (recivedData.type === "message") {
+            const userMessage: CoreUserMessage = {
+              role: "user",
+              content: recivedData.message,
+            };
+            Messages.push(userMessage);
+          } else {
+            const error: WebsocketError = {
+              error: "Invalid request INPUT",
+            };
+            ws.close(4001, JSON.stringify(error));
+          }
+
           const google = createGoogleGenerativeAI({
             apiKey: Bun.env.AI_TOKEN,
           });
@@ -363,7 +430,17 @@ const app = new Hono<{
               role: "assistant",
               content: await text,
             };
-            MessageToInsert.push(userMessage, assistantMessage);
+
+            // add user audio message
+            if (recivedData.type === "message") {
+              const userMessage: CoreUserMessage = {
+                role: "user",
+                content: recivedData.message,
+              };
+              MessageToInsert.push(userMessage);
+            }
+
+            MessageToInsert.push(assistantMessage);
 
             const toolCalls2 = await toolCalls;
             if (toolCalls2.length > 0) {
@@ -380,6 +457,25 @@ const app = new Hono<{
               ws.send(JSON.stringify(wsmsg));
               MessageToInsert.push(ast);
             }
+
+            if (recivedData.type === "audio") {
+              const file = recivedData.audio;
+
+              const originalExt = file.fileName.split(".").pop() || "";
+              const path = `uploads/${file.id}.${originalExt}`;
+              const fileExist = Bun.file(path);
+
+              if (await fileExist.exists()) {
+                console.log("File Exist");
+                await fileExist.delete();
+              }
+              for (let i = 0; i < name.length; i++) {
+                const fileName = name[i];
+                const fileManager = new GoogleAIFileManager(Bun.env.AI_TOKEN);
+                await fileManager.deleteFile(fileName);
+              }
+            }
+
             await db
               .insert(chats)
               .values(MessageToInsert.map((m) => ({ chatID, message: m })));
@@ -409,13 +505,7 @@ const app = new Hono<{
         },
       };
     })
-  )
-  .get("test", async (c) => {
-    console.log("Test");
-    return c.json({
-      message: "Test",
-    });
-  });
+  );
 
 app.use("*", (c, next) => {
   const mode = import.meta.env.NODE_ENV;

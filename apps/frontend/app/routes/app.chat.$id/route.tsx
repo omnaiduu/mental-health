@@ -1,7 +1,7 @@
 import type { Route } from ".react-router/types/app/routes/app.chat.$id/+types/route";
 
 import { hcWithType } from "@backend-api/om";
-import type { SendMessage, WsMsg } from "@backend-api/om/ws/types";
+import type { receiveMessage, WsMsg } from "@backend-api/om/ws/types";
 import type { CoreAssistantMessage, MessagesStored } from "backend/ai";
 import { useRef, useState } from "react";
 import { useWebSocket } from "~/hooks/useWebSocket";
@@ -12,6 +12,8 @@ import { ConnectAndDisconnect, FallbackLayout } from "./ErrorStates";
 import { useScrollToBottom } from "./scrollButtom";
 import type { ListParam, ShowResultParam } from "@backend-api/om/tools";
 import { ShowResult } from "./result";
+import { useUpload } from "~/hooks/upload";
+import { Progress } from "@/components/ui/Progress";
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   const client = hcWithType(import.meta.env.VITE_BACKEND).api.chat;
@@ -49,7 +51,43 @@ export default function Chat({ loaderData }: Route.ComponentProps) {
   const { data, id } = loaderData;
   const [isGenrating, setIsGenerating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const {
+    uploading,
+    setFileAndUpload,
+    fileList,
+    fileMetaData,
+    error: uploadError,
 
+    progress,
+  } = useUpload({
+    uploadUrl: `${import.meta.env.VITE_BACKEND}/api/upload`,
+    chunkSize: 1024 * 1024 * 10,
+    maxFileSize: 1024 * 1024 * 50,
+    onComplete: (file) => {
+      if (file.length === 0) {
+        console.log("no file uploaded");
+      }
+
+      if (file.length === 0) return;
+
+      const sendData: receiveMessage = {
+        type: "audio",
+        audio: file[0],
+      };
+      const userMessage: MessagesStored = {
+        role: "user",
+        content: [
+          {
+            type: "file",
+            data: `${import.meta.env.VITE_BACKEND}/api/upload/${file[0].id}`,
+            mimeType: file[0].mimeType,
+          },
+        ],
+      };
+      sendMessage(sendData);
+      setMessages((prev) => [...prev, userMessage]);
+    },
+  });
   const [messages, setMessages] = useState<MessagesStored[]>(
     data as unknown as MessagesStored[]
   );
@@ -87,6 +125,7 @@ export default function Chat({ loaderData }: Route.ComponentProps) {
       },
     });
 
+  console.log("upload eror", uploadError);
   useScrollToBottom(scrollRef, [messages, isConnecting, isDisconnected]);
 
   return (
@@ -119,26 +158,49 @@ export default function Chat({ loaderData }: Route.ComponentProps) {
                       return <ShowResult result={parameters.result} />;
                     }
                   }
+                  if (parts.type === "text" && parts.text !== "") {
+                    return (
+                      <Message
+                        key={index}
+                        message={{
+                          role: msg.role,
+                          content: parts.text,
+                        }}
+                      />
+                    );
+                  }
                 });
               }
 
-              return (
-                <Message
-                  key={index}
-                  message={msg}
-                  isLatest={index === messages.length - 1}
-                />
-              );
+              if (msg.role === "assistant" || msg.role === "user") {
+                return <Message key={index} message={msg} />;
+              }
             })}
           </AnimatePresence>
           <div ref={scrollRef} className="h-0" />
         </div>
-
+        <div className="flex flex-col gap-3 mb-2">
+          {fileList.length > 0 &&
+            fileList.map((file, index) => {
+              return (
+                <div
+                  key={file.id}
+                  className="w-full flex flex-col   p-6   rounded-lg space-y-2 text-text-base bg-primary/10 "
+                >
+                  <p className="text-text-base text-wrap font-semibold ">The AI is listening to your message...</p>
+                  {fileMetaData[index].status === "uploading" && (
+                    <Progress value={progress} max={100} />
+                  )}
+                </div>
+              );
+            })}
+        </div>
         <Input
           placeholder="Tell me more about your thoughts"
-          isGenrating={isGenrating}
+          isGenrating={isGenrating || uploading}
           onSend={(value) => {
-            const sendData: SendMessage = {
+            const sendData: receiveMessage = {
+              type: "message",
               message: value,
             };
             const userMessage: MessagesStored = {
@@ -146,7 +208,14 @@ export default function Chat({ loaderData }: Route.ComponentProps) {
               content: value,
             };
             setMessages((prev) => [...prev, userMessage]);
-            sendMessage(JSON.stringify(sendData));
+            sendMessage(sendData);
+          }}
+          onRecordComplete={(blob) => {
+            setFileAndUpload([
+              new File([blob], blob.name, {
+                type: blob.type,
+              }),
+            ]);
           }}
         />
       </ConnectAndDisconnect>

@@ -12,8 +12,9 @@ export function useRedirectHook({ data }: { data: RedirectData | undefined }) {
   useEffect(() => {
     if (!data) return;
 
+
     if (data.redirect) {
-     
+      
       navigate(data.location ?? "/login", {
         replace: true,
       });
@@ -39,7 +40,7 @@ export function useSecureFetcher<T>(options?: {
   const f = useFetcher<T>({
     key: options?.key,
   }) as BaseFetcher<T>;
-
+console.log(f.data);
   useRedirectHook({ data: f.data as RedirectData | undefined });
 
   return f;
