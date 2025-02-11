@@ -44,3 +44,7 @@ docker run -d \
   -e AI_TOKEN="AIzaSyCJ7pi_ORD8n_l6uMEy8fcCctD4byNG_7M" \
   --pull always \
   registry.digitalocean.com/freelance/mentalhealth:latest
+
+
+  ##use for docker login to regirt after dockelt setup
+  doctl registry login

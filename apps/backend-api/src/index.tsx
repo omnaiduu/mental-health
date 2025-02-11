@@ -42,10 +42,10 @@ import { FileState, GoogleAIFileManager } from "@google/generative-ai/server";
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
 // todo should only run in production
-if (import.meta.env.NODE_ENV === "production") {
-  console.log("Running miagration");
-  migrateProductionDB();
-}
+// if (import.meta.env.NODE_ENV === "production") {
+//   console.log("Running miagration");
+//   migrateProductionDB();
+// }
 
 declare module "bun" {
   interface Env {
@@ -311,17 +311,17 @@ const app = new Hono<{
             event.data.toString()
           ) as receiveMessage;
 
-          const StoredChat = await db
-            .select()
-            .from(chats)
-            .where(eq(chats.chatID, chatID));
-
-          const noteText = await db
-            .select({
-              text: chatsNotes.note,
-            })
-            .from(chatsNotes)
-            .where(eq(chatsNotes.chatID, chatID));
+          const startm = performance.now();
+          const [StoredChat, noteText] = await Promise.all([
+            db.select().from(chats).where(eq(chats.chatID, chatID)),
+            db
+              .select({
+                text: chatsNotes.note,
+              })
+              .from(chatsNotes)
+              .where(eq(chatsNotes.chatID, chatID)),
+          ]);
+          console.log("time select", performance.now() - startm);
 
           const systemPrompt =
             noteText.length > 0
@@ -336,16 +336,19 @@ const app = new Hono<{
           const Messages = [SystemMessage, ...onlyMessages];
           const name: string[] = [];
           if (recivedData.type === "audio") {
+            console.log("Audio");
             const fileManager = new GoogleAIFileManager(Bun.env.AI_TOKEN);
             const file = recivedData.audio;
 
             const filePart2: FilePart[] = [];
             const originalExt = file.fileName.split(".").pop() || "";
             const path = `uploads/${file.id}.${originalExt}`;
+            const startm3 = performance.now();
             const uploaded = await fileManager.uploadFile(path, {
               mimeType: file.mimeType,
               displayName: file.id,
             });
+            console.log("time uploaded", performance.now() - startm3);
 
             name.push(uploaded.file.name);
 
@@ -355,6 +358,7 @@ const app = new Hono<{
               data: uploaded.file.uri,
             });
 
+            const startm4 = performance.now();
             for (let i = 0; i < name.length; i++) {
               const fileName = name[i];
               // const originalExt = file.fileName.split(".").pop() || "";
@@ -378,6 +382,7 @@ const app = new Hono<{
               }
               console.log(`File ${fileG.displayName} is ready for analysis`);
 
+              console.log("time fileG", performance.now() - startm4);
               const userMessage: CoreUserMessage = {
                 role: "user",
                 content: filePart2,
@@ -385,6 +390,7 @@ const app = new Hono<{
               Messages.push(userMessage);
             }
           } else if (recivedData.type === "message") {
+            console.log("Message");
             const userMessage: CoreUserMessage = {
               role: "user",
               content: recivedData.message,
@@ -401,16 +407,15 @@ const app = new Hono<{
             apiKey: Bun.env.AI_TOKEN,
           });
 
+          const startm5 = performance.now();
           const startStream: StartTextStream = {
             type: "stream-start",
           };
           ws.send(JSON.stringify(startStream));
 
-          console.log("Messages", Messages);
-
           try {
             const { textStream, text, toolCalls } = streamText({
-              model: google("gemini-1.5-flash-latest"),
+              model: google("gemini-2.0-flash-exp"),
               messages: Messages,
               tools: tools,
             });
@@ -421,15 +426,21 @@ const app = new Hono<{
               };
               console.log("Message", message);
               ws.send(JSON.stringify(textstream));
-              ws.raw?.publishText(roomName, JSON.stringify(message));
             }
+
+            console.log("time streamText", performance.now() - startm5);
 
             const MessageToInsert = [];
 
+            const startm6 = performance.now();
             const assistantMessage: CoreAssistantMessage = {
               role: "assistant",
               content: await text,
             };
+            console.log(
+              "time text after steam wait text",
+              performance.now() - startm6
+            );
 
             // add user audio message
             if (recivedData.type === "message") {
@@ -444,6 +455,7 @@ const app = new Hono<{
 
             const toolCalls2 = await toolCalls;
             if (toolCalls2.length > 0) {
+              console.log("Tool Calls", toolCalls2);
               const ast = {
                 role: "assistant",
                 content: await toolCalls,
@@ -458,6 +470,7 @@ const app = new Hono<{
               MessageToInsert.push(ast);
             }
 
+            const startm7 = performance.now();
             if (recivedData.type === "audio") {
               const file = recivedData.audio;
 
@@ -475,10 +488,14 @@ const app = new Hono<{
                 await fileManager.deleteFile(fileName);
               }
             }
+            console.log("time delete file", performance.now() - startm7);
 
+            const startm8 = performance.now();
             await db
               .insert(chats)
               .values(MessageToInsert.map((m) => ({ chatID, message: m })));
+
+            console.log("time insert chats", performance.now() - startm8);
           } catch (e) {
             console.log(e);
 

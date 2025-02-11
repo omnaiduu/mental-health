@@ -13,7 +13,9 @@ export default defineConfig(({ isSsrBuild }) => ({
 				}
 			: undefined,
 	},
-	
+	server: {
+		allowedHosts: [`app.omnaidu.codes`],
+	},
 	plugins: [reactRouter(), tsconfigPaths()],
 	resolve: {
 		alias: {

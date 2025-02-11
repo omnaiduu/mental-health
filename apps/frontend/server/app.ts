@@ -20,16 +20,13 @@ export default {
 } satisfies Serve;
 
 export const frontend = createMiddleware(async (c, next) => {
-	
-	
-		let { pathname } = new URL(c.req.raw.url);
-		let file = Bun.file(`build/client${pathname}`);
-		if (await file.exists()) return new Response(file);
-		// Only if a file doesn't exists we send the request to the Remix request handler
-		const res = await rr7(c.req.raw);
-		if (!res.ok) {
-			next();
-		}
-		return res;
-	
+	let { pathname } = new URL(c.req.raw.url);
+	let file = Bun.file(`build/client${pathname}`);
+	if (await file.exists()) return new Response(file);
+	// Only if a file doesn't exists we send the request to the Remix request handler
+	const res = await rr7(c.req.raw);
+	if (!res.ok) {
+		next();
+	}
+	return res;
 });
