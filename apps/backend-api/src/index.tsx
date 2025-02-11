@@ -44,7 +44,7 @@ const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 // todo should only run in production
 if (import.meta.env.NODE_ENV === "production") {
   console.log("Running miagration");
-  // migrateProductionDB();
+  migrateProductionDB();
 }
 
 declare module "bun" {
